@@ -1,0 +1,1 @@
+# motel-renting-server
