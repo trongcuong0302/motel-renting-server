@@ -90,4 +90,8 @@ router.put("/:id", function(req, res) {
     handleResponse(req, res, user.updateProfile);
 });
 
+router.get("/:id", function(req, res) {
+    const user = new User();
+    handleResponse(req, res, user.getAnItem);
+});
 module.exports = router;

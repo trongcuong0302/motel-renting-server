@@ -47,8 +47,8 @@ class baseModel {
         });
 
         // find data
-        const dataArray = this.collection.find(queryDb).skip(response.pageIndex * response.pageSize).limit(response.pageSize).sort(sort).toArray();
-        const total = this.collection.countDocuments(queryDb);
+        const dataArray = this.collection.find({}).skip(response.pageIndex * response.pageSize).limit(response.pageSize).sort(sort).toArray();
+        const total = this.collection.countDocuments({});
         let results = await Promise.all([dataArray, total]);
 
         // get data
@@ -63,6 +63,7 @@ class baseModel {
         if (query.key === "_id") queryDB._id = mongo.ObjectId(query.value);
         else queryDB[query.key] = query.value;
         response.data = await this.collection.findOne(queryDB);
+        delete response.data?.pasword;
         return response;
     }
 
