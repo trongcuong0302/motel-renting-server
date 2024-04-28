@@ -94,4 +94,9 @@ router.get("/:id", function(req, res) {
     const user = new User();
     handleResponse(req, res, user.getAnItem);
 });
+
+router.get("/", function(req, res) {
+    const user = new User();
+    handleResponse(req, res, user.getAllItem);
+});
 module.exports = router;
