@@ -215,6 +215,15 @@ class userController extends CRUD {
         return res;
     }
 
+    getAllItem = async(req) => {
+        let filter = JSON.parse(req.query.filter);
+        const items = await this.model.findAllUser(filter);
+        if (!items.data) {
+            throw new APIException(400, "Can not find any items in the database")
+        }
+        return items;
+    }
+
 }
 
 module.exports = userController;

@@ -31,7 +31,7 @@ class productController extends CRUD {
     }
 
     dataValidation = async(data) => {
-        let requiredFields = ['roomType', "roomName", "price", 'deposit', 'location', 'address'];
+        let requiredFields = ['roomType', 'roomType', "roomName", "price", 'deposit', 'location', 'address'];
         let ignoredFields = ['_id', 'modifiedDate', 'createdDate'];
         return this.model.dataValidation(data, requiredFields, ignoredFields);
     }

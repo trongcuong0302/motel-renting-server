@@ -63,7 +63,7 @@ class baseModel {
         if (query.key === "_id") queryDB._id = mongo.ObjectId(query.value);
         else queryDB[query.key] = query.value;
         response.data = await this.collection.findOne(queryDB);
-        delete response.data?.pasword;
+        delete response.data?.password;
         return response;
     }
 
