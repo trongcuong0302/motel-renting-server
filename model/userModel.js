@@ -42,6 +42,10 @@ class userModel extends baseModel {
                 ];
             }
 
+            if (item.operator === 'matches') {
+                queryDb[item.field] = item.value;
+            }
+
             // sort
             if (item.operator === 'sort' && item.field) {
                 if (item.value === 'ascend') {

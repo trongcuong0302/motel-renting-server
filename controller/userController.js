@@ -25,9 +25,11 @@ class userController extends CRUD {
                 email: email,
                 password: password,
                 phoneNumber: phoneNumber,
-                name: req.body.name
+                name: req.body.name,
+                status: "inactive"
             }
             await this.model.insertAnItem(user);
+            await this.sendVerifyEmail( {email: user.email} );
             let response = { data: user };
             return response;
         } else {
@@ -42,7 +44,10 @@ class userController extends CRUD {
             throw new APIException(404, "Not found email or phone number");
         } else if (!(await bcrypt.compare(req.body.password, user.data.password))) {
             throw new APIException(400, "Password is incorrect");
+        } else if (user.data.status == "inactive") {
+            throw new APIException(400, "Your account is inactive. Please verify your account in your email message.");
         }
+
         return user;
     }
 
@@ -126,6 +131,86 @@ class userController extends CRUD {
         });
         
         return { message: 'Email sent successfully' };
+    }
+
+    sendVerifyEmail = async(req) => {
+        let queryDb = { key: "email", value: req.email };
+        let user = await this.model.findAnItem(queryDb);
+        if (!user.data) {
+            throw new APIException(404, "Email not found");
+        }
+
+        const payload = {
+            email: user.data.email,
+            phoneNumber: user.data.phoneNumber
+        }
+        const expiryTime = 999999999;
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: expiryTime});
+
+        const mailTransporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL_SEND,
+                pass: process.env.EMAIL_PASSWORD
+            }
+        });
+        let mailDetails = {
+            from: process.env.EMAIL_SEND,
+            to: user.data.email,
+            subject: "Account Verification",
+            html: `<html>
+                <head><title>Account Verification Request</title></head>
+                <body>
+                <h1>Account Verification Request</h1>
+                <p>Dear ${user.data.name},</p>
+                <p>We have received a request to register your account with <strong>StayEase</strong>. We have to verify whether the registered email address is your real email. To complete the email verification process, please click on the button below:</p>
+                <a href=${process.env.URL_WEB}/verify/${token}><button style="background-color: #4CAF50; color: white; padding: 14px 20px; border: none; cursor:pointer; border-radius: 4px;">Verify Account</button></a>
+                <p>Please note that if you don't verify your email address, you cannot sign in to our website.</p>
+                <p>Thank you,</p>
+                <p>Develop Team</p>
+                </body>
+                </html>`
+        };
+        await mailTransporter.sendMail(mailDetails, async(error, data) => {
+            if(error){
+                console.log(error);
+                throw new APIException(500, "Something went wrong while sending the email");
+            } else {
+                user.data.verifyToken = token;
+                const id = user.data._id;
+                delete user.data._id;
+                await this.model.updateById(id, user.data);
+            }
+        });
+        
+        return { message: 'Email sent successfully' };
+    }
+
+    verifyEmail = async(req) => {
+        const token = req.body.token;
+        let queryDb = { key: "verifyToken", value: token };
+        const user = await this.model.findAnItem(queryDb);
+        if (!user.data) {
+            throw new APIException(404, "Your account has already been activated or it does not exist!");
+        }
+        let isExpired = false;
+        jwt.verify(token, process.env.JWT_SECRET, async(err, data) => {
+            if (err) {
+                isExpired = true;
+            } else {
+                try { 
+                    user.data.status = "active";
+                    user.data.verifyToken = "";
+                    const id = user.data._id;
+                    delete user.data._id;
+                    await this.model.updateById(id, user.data);
+                    return { message: 'Account verification success' };
+                } catch (e) {
+                    throw new APIException(500, "Something went wrong while verify account");
+                }
+            }
+        });
+        if(isExpired) throw new APIException(500, "Verification link is expired. Please send a new request to verify your account!");
     }
 
     resetPassword = async(req) => {

@@ -25,6 +25,31 @@ class productController extends CRUD {
         }
     }
 
+    deleteItemById = async(request) => {
+        const motel = await this.getAnItem(request);
+        const user = await new userController().getUser({ _id : motel.data.owner });
+        let index = -1;
+        if(user.data.motelList && user.data.motelList.length) {
+            index = user.data.motelList.findIndex(item => item == request.params.id)
+        }
+        if(index >= 0) user.data.motelList.splice(index, 1);
+        let updateObject = {
+            body: user.data,
+            params: {
+                id: user.data._id.toString(),
+            }
+        }
+        const updateData = new userController().updateProfile(updateObject);
+        const item = this.model.deleteById(request.params.id);
+        let response = await Promise.all([updateData, item])
+        if (response[1].deletedCount) {
+            let message = { message: `Document with id ${request.params.id} has been deleted` };
+            return message;
+        } else {
+            throw new APIException(404, "Not Found");
+        }
+    }
+
     getProductStatistics = async(req) => {
         const items = await this.model.getProductStatistics(req);
         return items;
