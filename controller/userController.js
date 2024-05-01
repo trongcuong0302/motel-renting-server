@@ -126,6 +126,7 @@ class userController extends CRUD {
                 user.data.token = token;
                 const id = user.data._id;
                 delete user.data._id;
+                delete user.data.password;
                 await this.model.updateById(id, user.data);
             }
         });
@@ -179,6 +180,7 @@ class userController extends CRUD {
                 user.data.verifyToken = token;
                 const id = user.data._id;
                 delete user.data._id;
+                delete user.data.password;
                 await this.model.updateById(id, user.data);
             }
         });
@@ -203,6 +205,7 @@ class userController extends CRUD {
                     user.data.verifyToken = "";
                     const id = user.data._id;
                     delete user.data._id;
+                    delete user.data.password;
                     await this.model.updateById(id, user.data);
                     return { message: 'Account verification success' };
                 } catch (e) {
