@@ -52,7 +52,8 @@ class userController extends CRUD {
     }
 
     getUser = async(req) => {
-        let queryDb = { key: "_id", value: req._id };
+        let id = req?.params?.id ?? req._id;
+        let queryDb = { key: "_id", value: id };
         let res = await this.model.findAnItem(queryDb);
         if (!res.data) {
             throw new APIException(404, "Not Found");

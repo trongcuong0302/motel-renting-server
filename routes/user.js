@@ -97,7 +97,7 @@ router.put("/:id", function(req, res) {
 
 router.get("/:id", function(req, res) {
     const user = new User();
-    handleResponse(req, res, user.getAnItem);
+    handleResponse(req, res, user.getUser);
 });
 
 router.get("/", function(req, res) {
