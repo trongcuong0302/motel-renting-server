@@ -1,6 +1,6 @@
 const express = require('express');
 var products = require('./routes/product');
-var categories = require('./routes/category');
+var filters = require('./routes/filter');
 var users = require('./routes/user');
 var province = require('./routes/province');
 const Database = require('./libs/dbConnection');
@@ -20,7 +20,7 @@ const start = async() => {
     });
 
     app.use('/products', products);
-    app.use('/categories', categories);
+    app.use('/filters', filters);
     app.use('/users', users);
     app.use('/province', province);
 
