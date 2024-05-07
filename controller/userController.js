@@ -29,7 +29,7 @@ class userController extends CRUD {
                 status: "inactive"
             }
             await this.model.insertAnItem(user);
-            await this.sendVerifyEmail( {email: user.email} );
+            await this.sendVerifyEmail( {email: user.email, lang: req.body.language} );
             let response = { data: user };
             return response;
         } else {
@@ -102,22 +102,35 @@ class userController extends CRUD {
                 pass: process.env.EMAIL_PASSWORD
             }
         });
+        let subjectContent = req.body.language == "en" ? "Reset Password" : "Đặt lại mật khẩu"
+        let htmlContent = req.body.language == "en" ? `<html>
+                            <head><title>Password Reset Request</title></head>
+                            <body>
+                            <h1>Password Reset Request</h1>
+                            <p>Dear ${user.data.name},</p>
+                            <p>We have received a request to reset your password for your account with <strong>StayEase</strong>. To complete the password reset process, please click on the button below:</p>
+                            <a href=${process.env.URL_WEB}/reset/${token}><button style="background-color: #4CAF50; color: white; padding: 14px 20px; border: none; cursor:pointer; border-radius: 4px;">Reset Password</button></a>
+                            <p>Please note that this link is only valid for 5 minutes. If you did not request a password reset, please disregard this message.</p>
+                            <p>Thank you,</p>
+                            <p>StayEase Develop Team</p>
+                            </body>
+                            </html>` : `<html>
+            <head><title>Yêu cầu đặt lại mật khẩu</title></head>
+            <body>
+            <h1>Đặt lại mật khẩu</h1>
+            <p>Xin chào ${user.data.name},</p>
+            <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu đăng nhập của bạn trong <strong>StayEase</strong>. Để đặt lại mật khẩu của bạn, hãy nhấn vào nút bên dưới:</p>
+            <a href=${process.env.URL_WEB}/reset/${token}><button style="background-color: #4CAF50; color: white; padding: 14px 20px; border: none; cursor:pointer; border-radius: 4px;">Đặt lại mật khẩu</button></a>
+            <p>Hãy lưu ý rằng liên kết đã gửi cho bạn chỉ có hiệu lực trong 5 phút. Nếu bạn không gửi yêu cầu đặt lại mật khẩu, xin vui lòng bỏ qua email này.</p>
+            <p>Trân trọng,</p>
+            <p>Đội ngũ phát triển StayEase</p>
+            </body>
+            </html>`
         let mailDetails = {
             from: process.env.EMAIL_SEND,
             to: user.data.email,
-            subject: "Reset Password",
-            html: `<html>
-                <head><title>Password Reset Request</title></head>
-                <body>
-                <h1>Password Reset Request</h1>
-                <p>Dear ${user.data.name},</p>
-                <p>We have received a request to reset your password for your account with <strong>StayEase</strong>. To complete the password reset process, please click on the button below:</p>
-                <a href=${process.env.URL_WEB}/reset/${token}><button style="background-color: #4CAF50; color: white; padding: 14px 20px; border: none; cursor:pointer; border-radius: 4px;">Reset Password</button></a>
-                <p>Please note that this link is only valid for 5 minutes. If you did not request a password reset, please disregard this message.</p>
-                <p>Thank you,</p>
-                <p>Develop Team</p>
-                </body>
-                </html>`
+            subject: subjectContent,
+            html: htmlContent
         };
         await mailTransporter.sendMail(mailDetails, async(error, data) => {
             if(error){
@@ -156,22 +169,35 @@ class userController extends CRUD {
                 pass: process.env.EMAIL_PASSWORD
             }
         });
+        let subject = req.lang == "en" ? "Account Verification" : "Xác thực tài khoản";
+        let htmlContent = req.lang == "en" ? `<html>
+                                                <head><title>Account Verification Request</title></head>
+                                                <body>
+                                                <h1>Account Verification Request</h1>
+                                                <p>Dear ${user.data.name},</p>
+                                                <p>We have received a request to register your account with <strong>StayEase</strong>. We have to verify whether the registered email address is your real email. To complete the email verification process, please click on the button below:</p>
+                                                <a href=${process.env.URL_WEB}/verify/${token}><button style="background-color: #4CAF50; color: white; padding: 14px 20px; border: none; cursor:pointer; border-radius: 4px;">Verify Account</button></a>
+                                                <p>Please note that if you don't verify your email address, you cannot sign in to our website.</p>
+                                                <p>Thank you,</p>
+                                                <p>Develop Team</p>
+                                                </body>
+                                                </html>` : `<html>
+                <head><title>Yêu cầu xác thực tài khoản</title></head>
+                <body>
+                <h1>Yêu cầu xác thực tài khoản</h1>
+                <p>Xin chào ${user.data.name},</p>
+                <p>Chúng tôi đã nhận được thông tin đăng ký của bạn vào <strong>StayEase</strong>. Chúng tôi phải xác thực địa chỉ email của bạn để hoàn tất đăng ký. Để hoàn tất quá trình xác thực, hãy nhấn vào nút bên dưới:</p>
+                <a href=${process.env.URL_WEB}/verify/${token}><button style="background-color: #4CAF50; color: white; padding: 14px 20px; border: none; cursor:pointer; border-radius: 4px;">Xác thực tài khoản</button></a>
+                <p>Xin lưu ý nếu bạn không xác thực tài khoản của mình, bạn không thể đăng nhập vào trang web.</p>
+                <p>Trân trọng,</p>
+                <p>Đội ngũ phát triển StayEase</p>
+                </body>
+                </html>`;
         let mailDetails = {
             from: process.env.EMAIL_SEND,
             to: user.data.email,
-            subject: "Account Verification",
-            html: `<html>
-                <head><title>Account Verification Request</title></head>
-                <body>
-                <h1>Account Verification Request</h1>
-                <p>Dear ${user.data.name},</p>
-                <p>We have received a request to register your account with <strong>StayEase</strong>. We have to verify whether the registered email address is your real email. To complete the email verification process, please click on the button below:</p>
-                <a href=${process.env.URL_WEB}/verify/${token}><button style="background-color: #4CAF50; color: white; padding: 14px 20px; border: none; cursor:pointer; border-radius: 4px;">Verify Account</button></a>
-                <p>Please note that if you don't verify your email address, you cannot sign in to our website.</p>
-                <p>Thank you,</p>
-                <p>Develop Team</p>
-                </body>
-                </html>`
+            subject: subject,
+            html: htmlContent
         };
         await mailTransporter.sendMail(mailDetails, async(error, data) => {
             if(error){
