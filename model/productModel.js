@@ -37,6 +37,12 @@ class productModel extends baseModel {
             //find exactly matching
             if (item.operator === 'matches') {
                 if(item.field == 'location') queryDb["location.text"] = item.value;
+                else if(item.field == 'owner') {
+                    queryDb['$or'] = [
+                        { "renters._id": item.value },
+                        { owner: item.value }
+                    ];
+                }
                 else queryDb[item.field] = item.value;
             }
 
