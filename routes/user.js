@@ -104,4 +104,9 @@ router.get("/", function(req, res) {
     const user = new User();
     handleResponse(req, res, user.getAllItem);
 });
+
+router.delete("/:id", function(req, res) {
+    const user = new User();
+    handleResponse(req, res, user.deleteItemById);
+});
 module.exports = router;

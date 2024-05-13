@@ -65,6 +65,7 @@ class CRUD {
     }
 
     deleteItemById = async(request) => {
+        console.log(request.params.id)
         const item = await this.model.deleteById(request.params.id);
         if (item.deletedCount) {
             let message = { message: `Document with id ${request.params.id} has been deleted` };
