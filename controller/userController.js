@@ -47,6 +47,8 @@ class userController extends CRUD {
             throw new APIException(400, "Password is incorrect");
         } else if (user.data.status == "inactive") {
             throw new APIException(400, "Your account is inactive. Please verify your account in your email message.");
+        } else if (user.data.status == "block") {
+            throw new APIException(400, "Your account is blocked. Cannot login.");
         }
 
         return user;
