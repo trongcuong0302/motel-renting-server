@@ -26,7 +26,8 @@ class userController extends CRUD {
                 password: password,
                 phoneNumber: phoneNumber,
                 name: req.body.name,
-                status: "inactive"
+                status: "inactive",
+                role: req.body.role
             }
             await this.model.insertAnItem(user);
             await this.sendVerifyEmail( {email: user.email, lang: req.body.language} );
