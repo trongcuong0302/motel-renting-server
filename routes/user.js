@@ -109,4 +109,9 @@ router.delete("/:id", function(req, res) {
     const user = new User();
     handleResponse(req, res, user.deleteItemById);
 });
+
+router.post("/", function(req, res) {
+    const user = new User();
+    handleResponse(req, res, user.postAnItem);
+});
 module.exports = router;

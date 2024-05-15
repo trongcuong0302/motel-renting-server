@@ -342,6 +342,37 @@ class userController extends CRUD {
         return items;
     }
 
+    postAnItem = async(req) => {
+        let email = req.body.email;
+        let phoneNumber = req.body.phoneNumber;
+        email = await this.emailValidation(email);
+        phoneNumber = await this.phoneValidation(phoneNumber)
+        if(email) {
+            let password = req.body.password;
+            const salt = await bcrypt.genSalt(10);
+            password = await bcrypt.hash(password, salt);
+            let user = {
+                email: email,
+                password: password,
+                phoneNumber: phoneNumber,
+                name: req.body.name,
+                status: "active",
+                role: req.body.role
+            }
+            await this.model.insertAnItem(user);
+            let response = { data: user };
+            return response;
+        } else {
+            throw new APIException(400, "Invalid data");
+        }
+    }
+
+    dataValidation = async(data) => {
+        let requiredFields = ['email', 'password', 'phoneNumber', 'name'];
+        let ignoredFields = ['_id', 'modifiedDate', 'createdDate'];
+        return this.model.dataValidation(data, requiredFields, ignoredFields);
+    }
+
 }
 
 module.exports = userController;

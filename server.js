@@ -3,6 +3,7 @@ var products = require('./routes/product');
 var filters = require('./routes/filter');
 var users = require('./routes/user');
 var province = require('./routes/province');
+var feedback = require('./routes/feedback');
 const Database = require('./libs/dbConnection');
 
 const start = async() => {
@@ -23,6 +24,7 @@ const start = async() => {
     app.use('/filters', filters);
     app.use('/users', users);
     app.use('/province', province);
+    app.use('/feedback', feedback);
 
     console.log("server started");
     app.listen(3000);
