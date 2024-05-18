@@ -43,6 +43,12 @@ class productModel extends baseModel {
                         { owner: item.value }
                     ];
                 }
+                else if(item.field == 'ownerId') {
+                    queryDb['owner'] = item.value;
+                }
+                else if(item.field == 'renterId') {
+                    queryDb["renters._id"] = item.value;
+                }
                 else queryDb[item.field] = item.value;
             }
 
