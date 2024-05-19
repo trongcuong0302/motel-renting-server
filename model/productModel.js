@@ -38,10 +38,15 @@ class productModel extends baseModel {
             if (item.operator === 'matches') {
                 if(item.field == 'location') queryDb["location.text"] = item.value;
                 else if(item.field == 'owner') {
-                    queryDb['$or'] = [
+                    let qr = {'$or': [
                         { "renters._id": item.value },
                         { owner: item.value }
-                    ];
+                    ]};
+                    if(queryDb['$or'].length) {
+                        let q = { '$or': queryDb['$or'] };
+                        queryDb['$and'] = [q, qr];
+                        delete queryDb['$or'];
+                    } else queryDb['$or'] = qr['$or'];
                 }
                 else if(item.field == 'ownerId') {
                     queryDb['owner'] = item.value;

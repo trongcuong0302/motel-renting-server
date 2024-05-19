@@ -333,6 +333,21 @@ class userController extends CRUD {
         return res;
     }
 
+    updateMotelListForRenter = async(input) => {
+        let queryDb = { key: "_id", value: input.userId };
+        let user = await this.model.findAnItem(queryDb);
+        if (!user.data) {
+            throw new APIException(404, "Not Found");
+        }
+        const id = user.data._id;
+        let motelList = user.data?.rentedMotelList ?? [];
+        motelList.push(input.motelId);
+        let updateData = { rentedMotelList: motelList }
+        await this.model.updateById(id, updateData);
+        let res = { data: updateData };
+        return res;
+    }
+
     getAllItem = async(req) => {
         let filter = JSON.parse(req.query.filter);
         const items = await this.model.findAllUser(filter);

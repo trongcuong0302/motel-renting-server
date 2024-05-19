@@ -17,7 +17,18 @@ class productController extends CRUD {
                 motelId: res?.insertedId?.toString(),
                 userId: checkedData.owner
             }
-            await new userController().updateMotelListForUser(input);
+            let promises = [];
+            if(checkedData.renters && checkedData.renters.length) {
+                for(let renter of checkedData.renters) {
+                    let inputRenter = {
+                        motelId: res?.insertedId?.toString(),
+                        userId: renter._id
+                    }
+                    promises.push(new userController().updateMotelListForRenter(inputRenter))
+                }
+            }
+            promises.push(new userController().updateMotelListForUser(input));
+            await Promise.all(promises);
             let response = { data: checkedData };
             return response;
         } else {
