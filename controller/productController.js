@@ -36,6 +36,26 @@ class productController extends CRUD {
         }
     }
 
+    updateItemById = async(request) => {
+        let checkedData = await this.dataValidation(request.body);
+
+        if (checkedData) {
+            if(checkedData.oldRenters && checkedData.renters) {
+                await this.updateRenterProfile( { old: checkedData.oldRenters, new: checkedData.renters, roomId: request.params.id } )
+            }
+            delete checkedData.oldRenters;
+            const item = await this.model.updateById(request.params.id, checkedData);
+            if (item.matchedCount) {
+                let response = { data: checkedData };
+                return response;
+            } else {
+                throw new APIException(404, "Not Found");
+            }
+        } else {
+            throw new APIException(400, "Invalid data");
+        }
+    }
+
     deleteItemById = async(request) => {
         const motel = await this.getAnItem(request);
         const user = await new userController().getUser({ _id : motel.data.owner });
@@ -64,6 +84,53 @@ class productController extends CRUD {
     getProductStatistics = async(req) => {
         const items = await this.model.getProductStatistics(req);
         return items;
+    }
+
+    updateRenterProfile = async(req) => {
+        let old = req.old;
+        let newRenters = req.new;
+        let leave = [];
+
+        for (let i = 0; i < old.length; i++) {
+            let index = newRenters.findIndex((item) => item._id == old[i]._id);
+            if(index < 0) {
+                let id = old[i].rentedMotelList.findIndex((item) => item == req.roomId);
+                if(id >= 0) old[i].rentedMotelList.splice(id, 1);
+                let obj = {};
+                for(let key in old[i]) {
+                    obj[key] = old[i][key];
+                }
+                let updateObject = {
+                    body: obj,
+                    params: {
+                        id: old[i]._id.toString(),
+                    }
+                }
+                await (new userController().updateProfile(updateObject));
+            }
+        }
+
+        for (let i = 0; i < newRenters.length; i++) {
+            let index = old.findIndex((item) => item._id == newRenters[i]._id);
+
+            if(index < 0) {
+                let obj = { };
+                for(let key in newRenters[i]) {
+                    obj[key] = newRenters[i][key];
+                }
+                
+                if(!obj.rentedMotelList || !obj.rentedMotelList.length) obj.rentedMotelList = [];
+                obj.rentedMotelList.push(req.roomId)
+
+                let updateObject = {
+                    body: obj,
+                    params: {
+                        id: obj._id.toString(),
+                    }
+                }
+                await (new userController().updateProfile(updateObject));
+            }
+        }
     }
 
     dataValidation = async(data) => {
