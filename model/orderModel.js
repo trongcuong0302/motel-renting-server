@@ -32,6 +32,14 @@ class orderModel extends baseModel {
                 ];
             }
 
+            if (item.operator === 'admin') {
+                queryDb = {};
+            }
+
+            if (item.operator === 'matches') {
+                queryDb[item.field] = item.value;
+            }
+
             // find less than
             if (item.operator === 'less') {
                 if (item.value) queryDb[item.field] = { $lt: item.value };

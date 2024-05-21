@@ -28,6 +28,16 @@ class orderController extends CRUD {
         return items;
     }
 
+    getAnItem = async(request) => {
+        let queryDb = { key: "vnp_TxnRef", value: request.params.id };
+        const item = await this.model.findAnItem(queryDb);
+        
+        if (!item?.data) {
+            throw new APIException(404, "Not Found");
+        }
+        return item;
+    }
+
     dataValidation = async(data) => {
         let requiredFields = ['motelId', 'userId', 'description', 'expiryDate', 'paymentList', 'vnpUrl'];
         let ignoredFields = ['_id', 'modifiedDate', 'createdDate', 'isEdit'];

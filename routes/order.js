@@ -84,6 +84,7 @@ router.post('/create_payment_url', async function (req, res, next) {
     try {
         req.body['vnpUrl'] = vnpUrl;
         req.body['status'] = 'unpaid';
+        req.body['vnp_TxnRef'] = orderId;
         if(!req.body.isEdit) {
             const data = await order.postAnItem(req);
             res.status(200).json(data);
@@ -102,7 +103,7 @@ router.post('/create_payment_url', async function (req, res, next) {
     }
 });
 
-router.get('/vnpay_return', function (req, res, next) {
+router.get('/vnpay_return', async function (req, res, next) {
     let vnp_Params = JSON.parse(req.query.vnp_Params);
 
     let secureHash = vnp_Params['vnp_SecureHash'];
@@ -124,10 +125,54 @@ router.get('/vnpay_return', function (req, res, next) {
     
     if(secureHash === signed){
         //Kiem tra xem du lieu trong db co hop le hay khong va thong bao ket qua
+        try {
+            const order = new Order();
+            let bill = await order.getAnItem({params: {id: vnp_Params['vnp_TxnRef']}});
+            if(vnp_Params['vnp_ResponseCode'] == '00') bill.data['status'] = 'paid';
+            bill.data['payDate'] = vnp_Params['vnp_PayDate'];
+            
+            let updateObject = {
+                body: bill.data,
+                params: {
+                    id: bill.data._id.toString(),
+                }
+            }
 
-        res.status(200).json( {code: vnp_Params['vnp_ResponseCode']} )
+            await order.updateItemById(updateObject);
+
+            res.status(200).json( {code: vnp_Params['vnp_ResponseCode'], data: bill.data} )
+        } catch (error) {
+            if (error.code) {
+                res.status(error.code).json({ message: error.message });
+            } else {
+                res.status(500).json({ message: error.message });
+            }
+        }
+        
     } else{
-        res.status(200).json( {code: '97'} )
+
+        try {
+            const order = new Order();
+            let bill = await order.getAnItem({params: {id: vnp_Params['vnp_TxnRef']}});
+            
+            let updateObject = {
+                body: bill.data,
+                params: {
+                    id: bill.data._id.toString(),
+                }
+            }
+
+            await order.updateItemById(updateObject);
+
+            res.status(200).json( {code: '97', data: bill.data} );
+        } catch (error) {
+            if (error.code) {
+                res.status(error.code).json({ message: error.message });
+            } else {
+                res.status(500).json({ message: error.message });
+            }
+        }
+        
     }
 });
 
