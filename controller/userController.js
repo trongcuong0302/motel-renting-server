@@ -167,9 +167,17 @@ class userController extends CRUD {
 
         const mailTransporter = nodemailer.createTransport({
             service: "gmail",
+            port: 465,
+            secure: true,
+            logger: true,
+            debug: true,
+            secureConnection: true,
             auth: {
                 user: process.env.EMAIL_SEND,
                 pass: process.env.EMAIL_PASSWORD
+            },
+            tls: {
+                rejectUnauthorized: true
             }
         });
         let subject = req.lang == "en" ? "Account Verification" : "Xác thực tài khoản";
