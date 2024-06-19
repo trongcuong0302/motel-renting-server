@@ -9,6 +9,18 @@ class productController extends CRUD {
         this.model = new productModel();
     }
 
+    getAnItem = async(request) => {
+        let queryDb = { key: "_id", value: request.params.id };
+        const item = await this.model.findAnItem(queryDb);
+        if (!item.data) {
+            if(request.params.fromOrder) {
+                return null;
+            }
+            else throw new APIException(404, "Not Found");
+        }
+        return item;
+    }
+
     postAnItem = async(request) => {
         let checkedData = await this.dataValidation(request.body);
         if (checkedData) {

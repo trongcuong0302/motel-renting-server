@@ -59,7 +59,10 @@ class userController extends CRUD {
         let queryDb = { key: "_id", value: id };
         let res = await this.model.findAnItem(queryDb);
         if (!res.data) {
-            throw new APIException(404, "Not Found");
+            if(req?.fromOrder) {
+                return null;
+            }
+            else throw new APIException(404, "Not Found");
         }
         delete res.data.password;
         return res;

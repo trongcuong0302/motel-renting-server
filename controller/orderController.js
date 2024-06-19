@@ -19,9 +19,10 @@ class orderController extends CRUD {
         }
         for(let item of items.data) {
             let promises = [];
-            promises.push(new userController().getUser({ _id: item.userId }))
-            promises.push(new productController().getAnItem({ params: { id: item.motelId } }))
+            promises.push(new userController().getUser({ _id: item.userId, fromOrder: true }))
+            promises.push(new productController().getAnItem({ params: { id: item.motelId, fromOrder: true } }))
             let result = await Promise.all(promises);
+            if(!result[0]?.data || !result[1]?.data) continue;
             item.user = result[0].data;
             item.motel = result[1].data;
         }
