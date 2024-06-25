@@ -1,6 +1,7 @@
 const { MongoClient } = require('mongodb');
+require('dotenv').config();
 
-const URL = 'mongodb://root:root@127.0.0.1:27017';
+const URL = process.env.MONGODB_URL;
 const databaseName = 'manage_motel';
 const client = new MongoClient(URL);
 
