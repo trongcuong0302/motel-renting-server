@@ -1,4 +1,4 @@
-# WARP SERVER
+# SERVER
 
 ## Install nodejs 20.x
 <https://nodejs.org/en/download/package-manager>  
